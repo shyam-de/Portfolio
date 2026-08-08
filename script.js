@@ -1,13 +1,18 @@
+// Dynamic Year in Footer
+document.getElementById('year').textContent = new Date().getFullYear();
+
 // Mobile Navigation Toggle
 const navToggle = document.getElementById('navToggle');
 const navMenu = document.getElementById('navMenu');
 
-navToggle.addEventListener('click', () => {
-    navToggle.classList.toggle('active');
-    navMenu.classList.toggle('active');
-});
+if (navToggle) {
+    navToggle.addEventListener('click', () => {
+        navToggle.classList.toggle('active');
+        navMenu.classList.toggle('active');
+    });
+}
 
-// Close menu when a link is clicked
+// Close mobile menu when a link is clicked
 const navLinks = document.querySelectorAll('.nav-link');
 navLinks.forEach(link => {
     link.addEventListener('click', () => {
@@ -16,7 +21,7 @@ navLinks.forEach(link => {
     });
 });
 
-// Smooth scroll for navigation links
+// Smooth scroll for anchor links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
@@ -30,74 +35,54 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Navbar background on scroll
+// Update navbar on scroll
 window.addEventListener('scroll', () => {
     const navbar = document.querySelector('.navbar');
     if (window.scrollY > 50) {
-        navbar.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+        navbar.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
     } else {
-        navbar.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.05)';
+        navbar.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
     }
-});
-
-// Contact Form Handler
-const contactForm = document.getElementById('contactForm');
-if (contactForm) {
-    contactForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        // Get form data
-        const formData = new FormData(contactForm);
-        const name = contactForm.querySelector('input[type="text"]').value;
-        const email = contactForm.querySelector('input[type="email"]').value;
-        const message = contactForm.querySelector('textarea').value;
-        
-        // Validate form
-        if (!name || !email || !message) {
-            alert('Please fill in all fields');
-            return;
-        }
-        
-        // Show success message
-        const submitBtn = contactForm.querySelector('button[type="submit"]');
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Message Sent! ✓';
-        submitBtn.style.backgroundColor = '#10b981';
-        
-        // Reset form
-        contactForm.reset();
-        
-        // Reset button after 3 seconds
-        setTimeout(() => {
-            submitBtn.textContent = originalText;
-            submitBtn.style.backgroundColor = '';
-        }, 3000);
-    });
-}
+}, { passive: true });
 
 // Intersection Observer for scroll animations
 const observerOptions = {
     threshold: 0.1,
-    rootMargin: '0px 0px -100px 0px'
+    rootMargin: '0px 0px -50px 0px'
 };
 
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
             entry.target.style.animation = 'fadeInUp 0.6s ease forwards';
             observer.unobserve(entry.target);
         }
     });
 }, observerOptions);
 
-// Add animation to sections
+// Observe sections for animation
 const sections = document.querySelectorAll('section');
 sections.forEach(section => {
     section.style.opacity = '0';
     observer.observe(section);
 });
 
-// Add CSS animation
+// Observe project cards
+const projectCards = document.querySelectorAll('.project-card');
+projectCards.forEach((card, index) => {
+    card.style.opacity = '0';
+    observer.observe(card);
+});
+
+// Observe skill categories
+const skillCategories = document.querySelectorAll('.skill-category');
+skillCategories.forEach((category, index) => {
+    category.style.opacity = '0';
+    observer.observe(category);
+});
+
+// Add animation keyframes
 const style = document.createElement('style');
 style.textContent = `
     @keyframes fadeInUp {
@@ -135,32 +120,6 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Animate elements on scroll
-window.addEventListener('scroll', () => {
-    const projectCards = document.querySelectorAll('.project-card');
-    const skillTags = document.querySelectorAll('.skill-tag');
-    
-    projectCards.forEach((card, index) => {
-        const rect = card.getBoundingClientRect();
-        if (rect.top < window.innerHeight && rect.bottom > 0) {
-            if (index % 2 === 0) {
-                card.style.animation = 'slideInLeft 0.6s ease forwards';
-            } else {
-                card.style.animation = 'slideInRight 0.6s ease forwards';
-            }
-        }
-    });
-    
-    skillTags.forEach((tag, index) => {
-        const rect = tag.getBoundingClientRect();
-        if (rect.top < window.innerHeight) {
-            setTimeout(() => {
-                tag.style.animation = `fadeInUp 0.6s ease forwards`;
-            }, index * 50);
-        }
-    });
-});
-
 // Active navigation link based on scroll position
 window.addEventListener('scroll', () => {
     let current = '';
@@ -176,75 +135,81 @@ window.addEventListener('scroll', () => {
     
     document.querySelectorAll('.nav-link').forEach(link => {
         link.style.color = '';
-        if (link.getAttribute('href').slice(1) === current) {
-            link.style.color = 'var(--primary-color)';
+        const linkTarget = link.getAttribute('href').slice(1);
+        if (linkTarget === current) {
+            link.style.color = 'var(--primary)';
         }
+    });
+}, { passive: true });
+
+// Enhanced button hover effects
+const buttons = document.querySelectorAll('.btn');
+buttons.forEach(button => {
+    button.addEventListener('mouseenter', function() {
+        this.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+    });
+    
+    button.addEventListener('mousemove', function(e) {
+        const rect = this.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        this.style.setProperty('--mouse-x', x + 'px');
+        this.style.setProperty('--mouse-y', y + 'px');
     });
 });
 
-// Lazy load images (if images are added in future)
+// Keyboard navigation support
+document.addEventListener('keydown', (e) => {
+    // Close mobile menu on Escape
+    if (e.key === 'Escape') {
+        if (navToggle) {
+            navToggle.classList.remove('active');
+            navMenu.classList.remove('active');
+        }
+    }
+    
+    // Quick navigation with keyboard shortcuts
+    // Alt + H = Home
+    if (e.altKey && e.key === 'h') {
+        document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' });
+    }
+    // Alt + C = Contact
+    if (e.altKey && e.key === 'c') {
+        document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+    }
+});
+
+// Add focus-visible styles for accessibility
+document.addEventListener('keydown', () => {
+    document.body.classList.add('keyboard-nav');
+});
+
+document.addEventListener('mousedown', () => {
+    document.body.classList.remove('keyboard-nav');
+});
+
+// Lazy loading for future images
 if ('IntersectionObserver' in window) {
     const imageObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting && entry.target.dataset.src) {
-                entry.target.src = entry.target.dataset.src;
-                entry.target.removeAttribute('data-src');
-                imageObserver.unobserve(entry.target);
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                if (img.dataset.src) {
+                    img.src = img.dataset.src;
+                    img.removeAttribute('data-src');
+                    imageObserver.unobserve(img);
+                }
             }
         });
     });
     
-    document.querySelectorAll('img[data-src]').forEach(img => imageObserver.observe(img));
+    document.querySelectorAll('img[data-src]').forEach(img => {
+        imageObserver.observe(img);
+    });
 }
 
-// Add ripple effect to buttons
-const buttons = document.querySelectorAll('.btn');
-buttons.forEach(button => {
-    button.addEventListener('click', function(e) {
-        const ripple = document.createElement('span');
-        const rect = this.getBoundingClientRect();
-        const size = Math.max(rect.width, rect.height);
-        const x = e.clientX - rect.left - size / 2;
-        const y = e.clientY - rect.top - size / 2;
-        
-        ripple.style.width = ripple.style.height = size + 'px';
-        ripple.style.left = x + 'px';
-        ripple.style.top = y + 'px';
-        ripple.classList.add('ripple');
-        
-        this.appendChild(ripple);
-        
-        setTimeout(() => ripple.remove(), 600);
-    });
-});
-
-// Add ripple CSS
-const rippleStyle = document.createElement('style');
-rippleStyle.textContent = `
-    .btn {
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .ripple {
-        position: absolute;
-        border-radius: 50%;
-        background-color: rgba(255, 255, 255, 0.5);
-        transform: scale(0);
-        animation: ripple-animation 0.6s ease-out;
-        pointer-events: none;
-    }
-    
-    @keyframes ripple-animation {
-        to {
-            transform: scale(4);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(rippleStyle);
-
-// Throttle function for better performance
+// Throttle helper for performance
 function throttle(func, limit) {
     let inThrottle;
     return function() {
@@ -255,10 +220,10 @@ function throttle(func, limit) {
             inThrottle = true;
             setTimeout(() => inThrottle = false, limit);
         }
-    }
+    };
 }
 
-// Debounce function
+// Debounce helper
 function debounce(func, delay) {
     let timeoutId;
     return function() {
@@ -266,33 +231,71 @@ function debounce(func, delay) {
         const args = arguments;
         clearTimeout(timeoutId);
         timeoutId = setTimeout(() => func.apply(context, args), delay);
-    }
+    };
 }
 
-// Add loading state to forms
-const forms = document.querySelectorAll('form');
-forms.forEach(form => {
-    form.addEventListener('submit', function(e) {
-        const submitBtn = this.querySelector('button[type="submit"]');
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.style.opacity = '0.6';
+// Smooth parallax effect on hero section
+const heroSection = document.querySelector('.hero');
+if (heroSection) {
+    window.addEventListener('scroll', throttle(() => {
+        const scrollPosition = window.scrollY;
+        const heroVisual = document.querySelector('.hero-visual');
+        if (heroVisual && scrollPosition < window.innerHeight) {
+            heroVisual.style.transform = `translateY(${scrollPosition * 0.3}px)`;
         }
-    });
-});
+    }, 20), { passive: true });
+}
 
-// Keyboard navigation support
-document.addEventListener('keydown', (e) => {
-    // Close mobile menu on Escape
-    if (e.key === 'Escape') {
-        navToggle.classList.remove('active');
-        navMenu.classList.remove('active');
+// Performance: Use requestAnimationFrame for animations
+let ticking = false;
+window.addEventListener('scroll', () => {
+    if (!ticking) {
+        window.requestAnimationFrame(() => {
+            // Animation updates here if needed
+            ticking = false;
+        });
+        ticking = true;
+    }
+}, { passive: true });
+
+// Accessibility: Skip to main content
+const skipLink = document.createElement('a');
+skipLink.href = '#home';
+skipLink.textContent = 'Skip to main content';
+skipLink.className = 'skip-to-main';
+skipLink.style.cssText = `
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--primary);
+    color: white;
+    padding: 8px;
+    text-decoration: none;
+    z-index: 100;
+`;
+skipLink.addEventListener('focus', () => {
+    skipLink.style.top = '0';
+});
+skipLink.addEventListener('blur', () => {
+    skipLink.style.top = '-40px';
+});
+document.body.insertBefore(skipLink, document.body.firstChild);
+
+// Add reduced motion support
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+if (prefersReducedMotion.matches) {
+    document.documentElement.style.scrollBehavior = 'auto';
+}
+
+prefersReducedMotion.addEventListener('change', () => {
+    if (prefersReducedMotion.matches) {
+        document.documentElement.style.scrollBehavior = 'auto';
+    } else {
+        document.documentElement.style.scrollBehavior = 'smooth';
     }
 });
 
-// Print friendly styles
-window.addEventListener('beforeprint', () => {
-    document.body.style.backgroundColor = 'white';
-});
-
-console.log('Portfolio website loaded successfully! 🚀');
+// Console message
+console.log('%c🚀 Welcome to Shyam Mohan Singh\'s Portfolio', 'font-size: 16px; font-weight: bold; color: #3b82f6;');
+console.log('%cJava • Spring Boot • Microservices • GCP • Kubernetes', 'font-size: 12px; color: #6b7280;');
+console.log('%cLooking to collaborate? Reach out at Shyammohan0300@gmail.com', 'font-size: 12px; color: #10b981;');
